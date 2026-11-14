@@ -1,0 +1,21 @@
+# Copy to backend/.env or export in your shell. Every value has a working default.
+
+# LLM: an open-weight model served locally by Ollama (free, no API key).
+#   auto    = use Ollama when reachable, else the offline template (default)
+#   ollama  = require Ollama, fail loudly otherwise
+#   offline = never call a model
+LLM_MODE=auto
+OLLAMA_URL=http://localhost:11434
+LLM_MODEL=gpt-oss:20b
+
+# Embeddings: hashing (offline, default) or ollama (e.g. nomic-embed-text)
+EMBED_MODE=hashing
+EMBED_MODEL=nomic-embed-text
+
+# Vector DB: ":memory:" runs Qdrant inside the process, or a server URL
+QDRANT_URL=:memory:
+QDRANT_COLLECTION=venture_evidence
+
+# Enables the ledger tamper/restore demo endpoints
+DEMO_MODE=true
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173

@@ -1,0 +1,87 @@
+[
+  {
+    "id": "founder",
+    "name": "Founder Intelligence",
+    "color": "#4a86ff",
+    "mcp_server": "document-retrieval",
+    "tool": "idea_parse",
+    "manual_minutes": 10,
+    "needs": [],
+    "focus": "founder goal idea scope assumption commission"
+  },
+  {
+    "id": "market",
+    "name": "Market Research",
+    "color": "#22d3ee",
+    "mcp_server": "market-research",
+    "tool": "market_scan",
+    "manual_minutes": 30,
+    "needs": [
+      "founder"
+    ],
+    "focus": "market demand city volume growth hotels mobile statistics"
+  },
+  {
+    "id": "competitor",
+    "name": "Competitor Intelligence",
+    "color": "#8b5cf6",
+    "mcp_server": "competitor-discovery",
+    "tool": "competitors_search",
+    "manual_minutes": 40,
+    "needs": [
+      "founder"
+    ],
+    "focus": "competitor pricing commission presence marketplace rivals"
+  },
+  {
+    "id": "customer",
+    "name": "Customer Discovery",
+    "color": "#e879f9",
+    "mcp_server": "customer-lead-intel",
+    "tool": "segments_discover",
+    "manual_minutes": 30,
+    "needs": [
+      "founder"
+    ],
+    "focus": "farmers buyers pain interviews segment pay premium payment"
+  },
+  {
+    "id": "leads",
+    "name": "Lead Generation",
+    "color": "#fb923c",
+    "mcp_server": "customer-lead-intel",
+    "tool": "leads_find",
+    "manual_minutes": 25,
+    "needs": [
+      "customer"
+    ],
+    "focus": "leads cooperatives distributors procurement partners outreach"
+  },
+  {
+    "id": "growth",
+    "name": "Growth Strategy",
+    "color": "#a3e635",
+    "mcp_server": "financial-scenarios",
+    "tool": "gtm_simulate",
+    "manual_minutes": 25,
+    "needs": [
+      "market",
+      "competitor",
+      "customer",
+      "leads"
+    ],
+    "focus": "launch acquisition cost channel referral growth strategy"
+  },
+  {
+    "id": "critic",
+    "name": "Critical Thinking",
+    "color": "#d4d9f7",
+    "mcp_server": "document-retrieval",
+    "tool": "evidence_audit",
+    "manual_minutes": 15,
+    "needs": [
+      "growth"
+    ],
+    "focus": "weakness risk assumption evidence audit"
+  }
+]

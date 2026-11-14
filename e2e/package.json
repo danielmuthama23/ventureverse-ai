@@ -1,0 +1,7 @@
+{
+  "name": "venture-verse-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": { "smoke": "node smoke.mjs" },
+  "devDependencies": { "playwright": "^1.48.0" }
+}

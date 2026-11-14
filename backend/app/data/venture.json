@@ -1,0 +1,220 @@
+{
+  "cities": {
+    "Nairobi": {
+      "lat": -1.286,
+      "lon": 36.817
+    },
+    "Lelobi": {
+      "lat": -1.24,
+      "lon": 36.82
+    },
+    "Nakuru": {
+      "lat": -0.303,
+      "lon": 36.08
+    },
+    "Eldoret": {
+      "lat": 0.514,
+      "lon": 35.27
+    },
+    "Kisumu": {
+      "lat": -0.091,
+      "lon": 34.768
+    },
+    "Mombasa": {
+      "lat": -4.043,
+      "lon": 39.668
+    }
+  },
+  "competitors": [
+    {
+      "id": "soko",
+      "name": "SokoLink",
+      "kind": "Produce marketplace",
+      "price": "8% commission",
+      "strength": 0.8,
+      "overlap": 0.9,
+      "pos": [
+        -3.6,
+        0.6,
+        1.2
+      ],
+      "good": "Large buyer base",
+      "bad": "No input financing"
+    },
+    {
+      "id": "shamba",
+      "name": "ShambaMart",
+      "kind": "Input e-commerce",
+      "price": "Retail premium",
+      "strength": 0.6,
+      "overlap": 0.6,
+      "pos": [
+        3.2,
+        -0.6,
+        2.2
+      ],
+      "good": "Wide catalogue",
+      "bad": "Weak logistics"
+    },
+    {
+      "id": "mavuno",
+      "name": "MavunoHub",
+      "kind": "Co-op aggregator",
+      "price": "6% commission",
+      "strength": 0.5,
+      "overlap": 0.7,
+      "pos": [
+        -1.2,
+        1.6,
+        -3.8
+      ],
+      "good": "Strong in Nakuru",
+      "bad": "Phone-only ordering"
+    },
+    {
+      "id": "farmgate",
+      "name": "FarmGate Direct",
+      "kind": "B2B produce supply",
+      "price": "12% margin",
+      "strength": 0.7,
+      "overlap": 0.5,
+      "pos": [
+        3.8,
+        1,
+        -2.4
+      ],
+      "good": "Hotel and retail contracts",
+      "bad": "Narrow crop range"
+    },
+    {
+      "id": "kilimo",
+      "name": "Kilimo Credit Co",
+      "kind": "Agri fintech",
+      "price": "Interest on loans",
+      "strength": 0.55,
+      "overlap": 0.35,
+      "pos": [
+        0.2,
+        -1.8,
+        3.9
+      ],
+      "good": "Farmer financing",
+      "bad": "Not a marketplace"
+    }
+  ],
+  "competitor_edges": [
+    [
+      "soko",
+      "shamba"
+    ],
+    [
+      "soko",
+      "mavuno"
+    ],
+    [
+      "farmgate",
+      "soko"
+    ],
+    [
+      "kilimo",
+      "shamba"
+    ]
+  ],
+  "segments": [
+    {
+      "id": "small",
+      "name": "Smallholder grain and bean farmers",
+      "size": 0.95,
+      "pain": "Unreliable buyers, no price visibility",
+      "channel": "USSD, M-Pesa, co-ops",
+      "pos": [
+        -3.4,
+        0.4,
+        0
+      ],
+      "col": "#e879f9"
+    },
+    {
+      "id": "mid",
+      "name": "Mid-size horticulture growers",
+      "size": 0.55,
+      "pain": "Cold-chain and delivery timing",
+      "channel": "WhatsApp, field agents",
+      "pos": [
+        0,
+        1.4,
+        -3.2
+      ],
+      "col": "#22d3ee"
+    },
+    {
+      "id": "input",
+      "name": "Input suppliers and stockists",
+      "size": 0.4,
+      "pain": "Slow credit recovery",
+      "channel": "Distributor visits, B2B app",
+      "pos": [
+        3.4,
+        -0.2,
+        0
+      ],
+      "col": "#fb923c"
+    },
+    {
+      "id": "inst",
+      "name": "Institutional buyers",
+      "size": 0.3,
+      "pain": "Inconsistent quality, invoicing",
+      "channel": "Procurement portals, email",
+      "pos": [
+        0,
+        0.2,
+        3.4
+      ],
+      "col": "#a3e635"
+    }
+  ],
+  "leads": [
+    {
+      "id": "l1",
+      "name": "Nakuru Dairy and Produce Co-op",
+      "city": "Nakuru",
+      "fit": 86
+    },
+    {
+      "id": "l2",
+      "name": "Eldoret Grain Aggregators Ltd",
+      "city": "Eldoret",
+      "fit": 74
+    },
+    {
+      "id": "l3",
+      "name": "GreenRow Input Distributors",
+      "city": "Nairobi",
+      "fit": 71
+    },
+    {
+      "id": "l4",
+      "name": "Lakeside Schools Catering Group",
+      "city": "Kisumu",
+      "fit": 63
+    },
+    {
+      "id": "l5",
+      "name": "Coastline Hotels Procurement",
+      "city": "Mombasa",
+      "fit": 58
+    },
+    {
+      "id": "l6",
+      "name": "Rift Valley Potato Growers Union",
+      "city": "Nakuru",
+      "fit": 81
+    }
+  ],
+  "evidence_weights": {
+    "verified": 1,
+    "estimate": 0.6,
+    "hypothesis": 0.25
+  }
+}
