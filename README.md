@@ -1,5 +1,7 @@
 # VentureVerse AI
 
+![VentureVerse AI](./1.png)
+
 VentureVerse is a founder-facing market validation game: a founder enters a business idea, the app runs research agents, scores the opportunity, and surfaces a checkpoint where the founder decides whether to proceed, challenge, or ask for more evidence.
 
 The project is currently a full-stack monorepo with:
