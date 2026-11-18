@@ -1,4 +1,4 @@
-import type { ActResult, Checkpoint, Health, LabelResult, LedgerEntry, Mission, RagHit, RunResult, Status, VerifyResult, World } from "./types";
+import type { ActResult, AgentMessageView, AgentRegistryEntry, BandStatus, Checkpoint, CollaborationEvent, Health, LabelResult, LedgerEntry, Mission, RagHit, RunResult, Status, VerifyResult, WorkflowView, World } from "./types";
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(`/api${path}`, { ...init, headers: { "content-type": "application/json" } });
@@ -26,4 +26,11 @@ export const api = {
   ragSearch: (query: string, mission_id?: string) => post<{ passages: number; hits: RagHit[] }>("/rag/search", { query, k: 5, mission_id }),
   ragIngest: (mission_id: string, text: string) => post<{ passages: number }>("/rag/ingest", { mission_id, text }),
   scenario: (budget: number, cost_per_customer: number, churn: number) => post<{ series: number[]; steady_state: number }>("/scenario", { budget, cost_per_customer, churn }),
+  bandStatus: () => http<BandStatus>("/band/status"),
+  bandConnect: () => post<BandStatus>("/band/connect"),
+  agentRegistry: () => http<{agents: AgentRegistryEntry[]}>("/agents/registry"),
+  agentMessages: (correlationId?: string) => http<{messages: AgentMessageView[]}>(`/agents/messages${correlationId ? `?correlation_id=${encodeURIComponent(correlationId)}` : ""}`),
+  collaborativeWorkflow: (missionId: string) => post<{workflow_id:string;mission_id:string;status:string;tasks:Array<{task_id:string;agent:string;status:string}>}>(`/workflows/collaborative-venture/${missionId}`),
+  workflow: (workflowId: string) => http<WorkflowView>(`/workflows/${workflowId}`),
+  workflowEvents: (workflowId: string) => http<{events: CollaborationEvent[]}>(`/workflows/${workflowId}/events`),
 };

@@ -4,11 +4,37 @@
 
 VentureVerse is a founder-facing market validation game: a founder enters a business idea, the app runs research agents, scores the opportunity, and surfaces a checkpoint where the founder decides whether to proceed, challenge, or ask for more evidence.
 
-The project is currently a full-stack monorepo with:
-- a Python/FastAPI backend for missions, scoring, routing, and the game loop
-- a React + Vite frontend for the interactive dashboard and command-center UI
-- a local map view that emphasizes Nairobi while keeping the rest of the relevant Kenyan cities visible in the same scene
-- a hash-chained ledger and simulated trust layer for the challenge flow
+The project is a full-stack monorepo for collaborative, founder-led venture validation, combining:
+
+- A Python/FastAPI backend for missions, scoring, routing, and the game loop
+- A React + Vite frontend for the interactive dashboard and command-center UI
+- Qdrant-backed evidence retrieval and MCP tool integrations
+- Local Kenyan market maps and a simulated hash-chained ledger
+- **BAND agent-to-agent collaboration** for structured messages, delegation, shared context, and workflow visibility
+
+## Key features
+
+| Feature | What VentureVerse provides |
+| --- | --- |
+| **AI-powered venture research** | Runs market, competitor, customer, lead, growth, and critical-review agents. |
+| **BAND agent collaboration** | Connects VentureVerse agents through a provider-independent collaboration layer with mock mode and verified BAND live-provider support. |
+| **Interactive command center** | Uses React, Vite, a 3D stage, evidence panels, maps, mission controls, and a live Collaboration Center. |
+| **Human governance** | Keeps consequential decisions behind APPROVE, CHALLENGE, and RESEARCH MORE checkpoints. |
+| **Evidence and retrieval** | Uses Qdrant-backed semantic search and MCP tools for bounded, auditable research. |
+| **Trust and audit trail** | Records mission decisions in a simulated hash-chained ledger and collaboration event history. |
+
+## Contents
+
+- [Current stack](#current-stack)
+- [Project layout](#project-layout)
+- [Quick start](#quick-start)
+- [Current app behavior](#current-app-behavior)
+- [Map and region view](#map-and-region-view)
+- [BAND Agent-to-Agent Collaboration](#band-agent-to-agent-collaboration)
+- [Backend API summary](#backend-api-summary)
+- [Testing](#testing)
+- [Optional local model setup](#optional-local-model-setup)
+- [Notes](#notes)
 
 ## Current stack
 
@@ -163,10 +189,12 @@ A founder can:
 - verify the ledger history
 
 The dashboard currently includes:
-- a command-center / 3D stage
-- a mission panel with a founder brief and agent queue
-- evidence and ledger tabs
-- a location map that centers Nairobi while showing the broader Kenyan market footprint, including the other relevant cities and towns in the same visual
+
+- A command-center / 3D stage
+- A mission panel with a founder brief and agent queue
+- Evidence and ledger tabs
+- A **BAND Collaboration Center** for agent status, messages, task progress, events, and analytics
+- A location map that centers Nairobi while showing the broader Kenyan market footprint, including the other relevant cities and towns in the same visual
 
 ## Map and region view
 
@@ -175,6 +203,96 @@ The current map behavior intentionally emphasizes Nairobi as the anchor city, wh
 The city ring overlays and labels are driven by the mission data and the current venture dataset in:
 - `backend/app/data/venture.json`
 - `frontend/src/components/LocationMap.tsx`
+
+## BAND Agent-to-Agent Collaboration
+
+VentureVerse can run as a mock collaboration system with no external credentials, or use the verified BAND Agent API with one registered Band agent identity.
+
+### Official capabilities verified
+
+- Band agents authenticate with an agent API key (`band_a_...`) sent in `X-API-Key`.
+- Agent API: `/api/v1/agent/me`, `/api/v1/agent/chats`, `/api/v1/agent/chats/{chat_id}/messages`, `/api/v1/agent/chats/{chat_id}/events`, `/api/v1/agent/chats/{chat_id}/context`, and room task endpoints.
+- BAND routes text messages by room mentions; events record thoughts, tool calls, task activity and human attention.
+- Agent context and task status are rehydrated from Band REST endpoints.
+- Band Cloud REST defaults are `https://app.band.ai` and `wss://app.band.ai/api/v1/socket/websocket`.
+
+This provider boundary uses verified REST operations. SDK/WebSocket-specific room streaming is not presented as live until credentials are configured and a dedicated live test passes.
+
+### Architecture
+
+```mermaid
+flowchart LR
+  U[Founder] --> O[Existing Orchestrator]
+  O --> M[Market]
+  O --> C[Competitor]
+  O --> CU[Customer]
+  CU --> L[Leads]
+  M & C & L --> G[Growth]
+  G --> R[Critic]
+  R --> H[Human APPROVE/CHALLENGE/RESEARCH]
+  H --> Report[Sealed Venture Report]
+
+  O <--> CM[Collaboration Store]
+  CM <--> PA[Provider Adapter]
+  PA <--> MOCK[Mock Provider]
+  PA <--> BAND[Verified BAND REST Agent API]
+  CM <--> Q[Qdrant + MCP Tools]
+```
+
+### Mock mode
+
+Mock mode is the default:
+
+```bash
+BAND_ENABLED=false
+```
+
+Start the app normally. Open the **Collaboration Center** tab and choose **Run collaborative workflow**. Messages, tasks, events and analytics are clearly local simulated activity.
+
+### Enable real BAND
+
+1. Create or sign in to `https://app.band.ai`.
+2. Open **Agents** and select **Connect remote agent**.
+3. Register a remote agent and copy its ID and one-time agent API key (format `band_a_...`).
+4. Set:
+
+```bash
+BAND_ENABLED=true
+BAND_AGENT_ID=<registered-agent-uuid>
+BAND_API_KEY=<agent-api-key>
+BAND_REST_URL=https://app.band.ai
+BAND_WS_URL=wss://app.band.ai/api/v1/socket/websocket
+```
+
+5. Restart FastAPI. `GET /api/band/status` validates configuration and calls `GET /api/v1/agent/me`.
+6. Never commit `.env`, `agent_config.yaml`, API keys or credentials.
+
+### Collaboration API
+
+- `GET /api/band/status`
+- `POST /api/band/connect`
+- `GET /api/agents/registry`
+- `GET /api/agents/messages`
+- `POST /api/agents/messages`
+- `POST /api/agents/delegate`
+- `GET /api/agents/tasks/{task_id}`
+- `POST /api/workflows/collaborative-venture/{mission_id}`
+- `GET /api/workflows/{workflow_id}`
+- `GET /api/workflows/{workflow_id}/events`
+- `WS /ws/collaboration`
+
+### Agricultural marketplace demonstration
+
+Create a mission with: `AI-powered agricultural marketplace in Kenya`. Open **Collaboration Center**, run the collaborative workflow, then review the existing evidence and use the checkpoint to APPROVE, CHALLENGE or request further RESEARCH. Synthetic evidence is clearly identified by the existing demo/sample data model.
+
+### BAND tests
+
+```bash
+cd backend
+python -m pytest -q tests/test_collaboration.py
+```
+
+Mock tests do not require BAND credentials. Live integration tests require a dedicated test agent and credentials.
 
 ## Backend API summary
 
@@ -220,5 +338,3 @@ When Ollama is reachable, `/api/health` reflects the active model. When it is no
 - The current venture data is sample/demo data for the app’s gameplay and research flow.
 - The ledger is a simulated hash-chained flow intended for challenge/demo use rather than production blockchain anchoring.
 - The app is designed for human decision-making: the founder stays in control of approvals and checkpoint decisions.
-
-# ventureverse-ai

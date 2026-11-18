@@ -29,6 +29,12 @@ class Settings:
             if o.strip()
         )
     )
+    # BAND agent-to-agent collaboration. Live provider is opt-in.
+    band_enabled: bool = os.getenv("BAND_ENABLED", "false").lower() == "true"
+    band_api_key: str = os.getenv("BAND_API_KEY", "")
+    band_agent_id: str = os.getenv("BAND_AGENT_ID", "")
+    band_rest_url: str = os.getenv("BAND_REST_URL", "https://app.band.ai").rstrip("/")
+    band_ws_url: str = os.getenv("BAND_WS_URL", "wss://app.band.ai/api/v1/socket/websocket")
 
 
 settings = Settings()

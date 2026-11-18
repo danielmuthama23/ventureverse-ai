@@ -7,6 +7,7 @@ import EvidencePanel from "./components/EvidencePanel";
 import RagPanel from "./components/RagPanel";
 import LedgerPanel from "./components/LedgerPanel";
 import CheckpointModal from "./components/CheckpointModal";
+import CollaborationPanel from "./components/CollaborationPanel";
 
 const Scene = lazy(() => import("./components/Scene"));
 const STEPS = ["Brief", "Research", "Triage", "Checkpoint", "Sealed"];
@@ -90,9 +91,9 @@ export default function App() {
 
         <aside className="side">
           <nav className="tabs" role="tablist">
-            {(["mission", "evidence", "rag", "ledger"] as Tab[]).map((t) => (
+            {(["mission", "evidence", "rag", "ledger", "collaboration"] as Tab[]).map((t) => (
               <button key={t} className="tab" role="tab" aria-selected={tab === t} data-p={t} onClick={() => setTab(t)}>
-                {{ mission: "Mission", evidence: "Evidence", rag: "RAG lab", ledger: "Ledger" }[t]}
+                {{ mission: "Mission", evidence: "Evidence", rag: "RAG lab", ledger: "Ledger", collaboration: "Collaboration Center" }[t]}
                 {t === "evidence" && <span className="n">{(mission?.claims.length ?? 0) - (mission?.reviewed ?? 0)}</span>}
                 {t === "ledger" && <span className="n">{mission?.ledger_length ?? 0}</span>}
               </button>
@@ -102,6 +103,7 @@ export default function App() {
           <div className={`pane ${tab === "evidence" ? "on" : ""}`} id="pane-evidence"><EvidencePanel api={api} /></div>
           <div className={`pane ${tab === "rag" ? "on" : ""}`} id="pane-rag"><RagPanel api={api} /></div>
           <div className={`pane ${tab === "ledger" ? "on" : ""}`} id="pane-ledger"><LedgerPanel api={api} /></div>
+          <div className={`pane ${tab === "collaboration" ? "on" : ""}`} id="pane-collaboration"><CollaborationPanel mission={mission} /></div>
         </aside>
       </main>
 

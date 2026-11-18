@@ -5,16 +5,18 @@ import hashlib
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import data_loader, llm, scoring
 from .agents import orchestrator as orch
+from .agents.collaboration import collaboration
+from .agents.workflow import run_collaborative
 from .config import settings
 from .rag.store import get_store
-from .schemas import CheckpointAction, LabelRequest, MissionCreate, RagIngest, RagSearch, ScenarioRequest
+from .schemas import CheckpointAction, LabelRequest, MissionCreate, RagIngest, RagSearch, ScenarioRequest, AgentMessageRequest, TaskDelegationRequest
 from .state import Mission, missions
 from .tools.gateway import ToolError, call_tool
 
@@ -127,6 +129,8 @@ async def act(mission_id: str, body: CheckpointAction):
     m = _mission(mission_id)
     try:
         result = await orch.act_on_checkpoint(m, body.action, body.weaknesses)
+        workflow_id = f"workflow-{m.id}"
+        await collaboration.publish(workflow_id, f"human.{body.action}", f"Human {body.action} decision recorded", {"weaknesses": body.weaknesses})
     except orch.OrchestrationError as e:
         raise HTTPException(e.status, str(e)) from e
     return {**result, "mission": _view(m)}
@@ -180,6 +184,95 @@ async def scenario(body: ScenarioRequest):
         return await call_tool("scenario_simulate", body.model_dump())
     except ToolError as e:
         raise HTTPException(422, str(e)) from e
+
+
+@app.get("/api/band/status")
+async def band_status():
+    return await collaboration.adapter.status()
+
+
+@app.post("/api/band/connect")
+async def band_connect():
+    try:
+        return await collaboration.connect()
+    except Exception as e:
+        raise HTTPException(503, str(e)) from e
+
+
+@app.get("/api/agents/registry")
+async def agent_registry():
+    return {"agents": [
+        {**a, "agent_id": a["id"], "status": "registered", "current_task_id": None,
+         "correlation_id": None, "execution_history": []}
+        for a in data_loader.agents()
+    ] + [{"agent_id": "orchestrator-agent", "name": "VentureVerse Orchestrator", "role": "Coordinator", "description": "Coordinates dependencies and human checkpoints", "status": "registered", "current_task_id": None, "correlation_id": None, "execution_history": []}]}
+
+
+@app.get("/api/agents/messages")
+async def agent_messages(correlation_id: str | None = None):
+    values = list(collaboration.messages.values())
+    if correlation_id:
+        values = [m for m in values if m.correlation_id == correlation_id]
+    return {"messages": [m.model_dump(mode="json") for m in values]}
+
+
+@app.post("/api/agents/messages")
+async def agent_send_message(body: AgentMessageRequest):
+    message = await collaboration.send(body.sender_agent, body.recipient_agent, body.correlation_id,
+                                      body.message_type, body.payload, body.task_id, body.requires_response)
+    return message.model_dump(mode="json")
+
+
+@app.post("/api/agents/delegate")
+async def agent_delegate(body: TaskDelegationRequest):
+    task = await collaboration.delegate(body.workflow_id, body.assignee, body.subject, body.dependencies)
+    return task.model_dump(mode="json")
+
+
+@app.get("/api/agents/tasks/{task_id}")
+async def agent_task(task_id: str):
+    task = collaboration.tasks.get(task_id)
+    if not task:
+        raise HTTPException(404, "task not found")
+    return task.model_dump(mode="json")
+
+
+@app.post("/api/workflows/collaborative-venture/{mission_id}")
+async def collaborative_workflow(mission_id: str):
+    m = _mission(mission_id)
+    try:
+        return await run_collaborative(m)
+    except orch.OrchestrationError as e:
+        raise HTTPException(e.status, str(e)) from e
+
+
+@app.get("/api/workflows/{workflow_id}")
+async def workflow_view(workflow_id: str):
+    tasks = [t.model_dump(mode="json") for t in collaboration.tasks.values() if t.workflow_id == workflow_id]
+    return {"workflow_id": workflow_id, "tasks": tasks,
+            "completed": sum(t["status"] == "completed" for t in tasks),
+            "failed": sum(t["status"] == "failed" for t in tasks),
+            "pending": sum(t["status"] in ("pending", "in_progress", "blocked") for t in tasks)}
+
+
+@app.get("/api/workflows/{workflow_id}/events")
+async def workflow_events(workflow_id: str):
+    return {"events": [e for e in collaboration.events if e.get("workflow_id") == workflow_id]}
+
+
+@app.websocket("/ws/collaboration")
+async def collaboration_socket(ws: WebSocket):
+    await ws.accept()
+    cursor = 0
+    try:
+        import asyncio
+        while True:
+            while cursor < len(collaboration.events):
+                await ws.send_json(collaboration.events[cursor])
+                cursor += 1
+            await asyncio.sleep(0.25)
+    except WebSocketDisconnect:
+        return
 
 
 # Serve the built frontend when present (single-process deployment).

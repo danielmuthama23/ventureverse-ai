@@ -1,7 +1,7 @@
 export type Status = "verified" | "estimate" | "hypothesis";
 export type AgentStatus = "locked" | "ready" | "running" | "done";
 export type Mode = "command" | "competitors" | "customers" | "radar";
-export type Tab = "mission" | "evidence" | "rag" | "ledger";
+export type Tab = "mission" | "evidence" | "rag" | "ledger" | "collaboration";
 
 export interface AgentInfo {
   id: string; name: string; color: string; mcp_server: string; tool: string;
@@ -44,3 +44,9 @@ export interface LedgerEntry { seq: number; ts: string; type: string; payload_ha
 export interface RagHit { id: string; score: number; title: string; text: string; url: string | null; collection: string }
 export interface Health { status: string; llm: string; embedder: string; vector_store: string; passages: number; demo_mode: boolean }
 export interface VerifyResult { ok: boolean; entries: { seq: number; payload_ok: boolean; link_ok: boolean }[] }
+
+export interface BandStatus { connected: boolean; mode: "band" | "mock"; authentication: string; last_sync: string | null; error: string | null; real_sdk_enabled: boolean }
+export interface AgentRegistryEntry { agent_id: string; name: string; role?: string; description?: string; status: string; current_task_id: string | null }
+export interface AgentMessageView { message_id: string; correlation_id: string; task_id: string | null; sender_agent: string; recipient_agent: string; message_type: string; timestamp: string; payload: Record<string, unknown>; status: string }
+export interface CollaborationEvent { event_id: string; workflow_id: string; task_id?: string; type: string; summary: string; timestamp: string }
+export interface WorkflowView { workflow_id: string; tasks: Array<{task_id:string; assignee:string; subject:string; status:string}>; completed:number; failed:number; pending:number }
